@@ -1,128 +1,140 @@
-# 🌤️ Weather App
 
-[![GitHub Stars](https://img.shields.io/github/stars/eswarsamanthula/Weather-App?style=social)](https://github.com/eswarsamanthula/Weather-App/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/eswarsamanthula/Weather-App?style=social)](https://github.com/eswarsamanthula/Weather-App/network/members)
-[![GitHub Issues](https://img.shields.io/github/issues/eswarsamanthula/Weather-App)](https://github.com/eswarsamanthula/Weather-App/issues)
-[![GitHub License](https://img.shields.io/github/license/eswarsamanthula/Weather-App)](https://github.com/eswarsamanthula/Weather-App/blob/main/LICENSE)
+# 🌤️ Weather Insight Web
 
-A sleek weather forecast app that fetches real-time weather data using the OpenWeatherMap API. Includes geolocation, dynamic backgrounds, retry options, and a user-friendly interface.
+[![GitHub Stars](https://img.shields.io/github/stars/eswarsamanthula/Weather-Insight-Web?style=social)](https://github.com/eswarsamanthula/Weather-Insight-Web/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/eswarsamanthula/Weather-Insight-Web?style=social)](https://github.com/eswarsamanthula/Weather-Insight-Web/network/members)
+[![GitHub Issues](https://img.shields.io/github/issues/eswarsamanthula/Weather-Insight-Web)](https://github.com/eswarsamanthula/Weather-Insight-Web/issues)
+[![GitHub License](https://img.shields.io/github/license/eswarsamanthula/Weather-Insight-Web)](https://github.com/eswarsamanthula/Weather-Insight-Web/blob/main/LICENSE)
 
-🔗 **Live Demo:** [eswarsamanthula.github.io/Weather-App](https://eswarsamanthula.github.io/Weather-App)
+A sleek, modern weather app built with vanilla JavaScript and Vite that delivers real-time weather data, geolocation support, dynamic backgrounds, and a responsive interface. The app integrates the OpenWeatherMap API and prioritizes both functionality and design.
+
+🔗 **Live Demo:** [eswarsamanthula.github.io/Weather-Insight-Web](https://eswarsamanthula.github.io/Weather-Insight-Web)
 
 ---
 
 ## ✨ Features
 
-- 🌍 Fetch weather based on **geolocation** or **city search**
-- 🌤 Dynamic **backgrounds** based on weather conditions
-- 🔁 Retry button for failed API requests
-- 🌡 Displays temperature, humidity, wind, and description
-- 📱 Fully responsive design
-- ⏳ 5-day forecast (in-progress)
-- 🔐 API key hidden using `.env` in local development
+- 📍 **Geolocation** support: Get the weather for your current location instantly.
+- 🔍 **City search**: Enter any city to fetch real-time weather data.
+- 🌈 **Dynamic backgrounds**: Visuals change based on weather conditions.
+- 🔁 **Retry mechanism**: Easily retry failed API calls.
+- 🌡️ Display of temperature, humidity, wind speed, and conditions.
+- 📱 Fully **responsive UI** for mobile and desktop.
+- ⏳ **5-day forecast** section (in progress).
+- 🔐 Secure **API key management** via `.env`.
 
 ---
 
 ## 📸 Screenshots
 
-### 🔍 Search by City
-<img src="screenshots/current-weather-light.png" alt="Weather App Search" width="600"/>
+### 🌇 Search by City
+<img src="screenshots/current-weather-light.png" alt="Weather App Light Mode" width="600"/>
 
-### 📍 Weather by Location
-<img src="screenshots/current-weather-dark.png" alt="Geolocation Weather" width="600"/>
+### 📍 Location-based Weather
+<img src="screenshots/current-weather-dark.png" alt="Weather App Dark Mode" width="600"/>
 
-### ❌ Retry on Error
-<img src="screenshots/error.png" alt="Error and Retry" width="600"/>
+### ❌ Error + Retry
+<img src="screenshots/error.png" alt="Error State with Retry" width="600"/>
 
-### 📅 forecast
-<img src="screenshots/forecast.png" alt="Error and Retry" width="600"/>
-
----
-
-## 📅 Roadmap
-
-- [x] Geolocation-based weather fetch
-- [x] Manual city input search
-- [x] Retry button for API failure
-- [x] Dynamic backgrounds
-- [x] API key protection via `.env`
-- [ ] 5-day forecast with weather icons ⛅
-- [ ] Hourly forecast toggle
-- [ ] Unit switch (°C / °F)
-- [ ] Dark/light theme toggle 🌙🌞
+### 📅 5-Day Forecast
+<img src="screenshots/forecast.png" alt="Forecast Section" width="600"/>
 
 ---
 
-## 🛠️ Tech Stack
+## 🗺️ Roadmap
 
-- HTML5
-- CSS3
-- JavaScript (Vanilla)
-- OpenWeatherMap API
-- GitHub Pages (for hosting)
+- ✅ Geolocation-based fetch
+- ✅ City input support
+- ✅ Retry button for errors
+- ✅ Dynamic visual backgrounds
+- ✅ API key security with `.env`
+- ⏳ 5-day forecast UI and icons
+- ⏳ Hourly forecast toggle
+- ⏳ °C / °F temperature unit switch
+- ⏳ Dark/light theme toggle 🌙/🌞
 
 ---
 
-## 📂 Project Structure
+## 🛠 Tech Stack
 
-📦 Weather-App ┣ 📜 index.html ┣ 📜 style.css ┣ 📜 script.js ┣ 📁 screenshots/ ┃ ┣ 📜 README.md
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript
+- **Bundler**: Vite
+- **API**: OpenWeatherMap API
+- **Hosting**: GitHub Pages
 
+---
+
+## 📁 Project Structure
+
+```
+Weather-Insight-Web/
+├── index.html
+├── style.css
+├── script.js
+├── screenshots/
+│   ├── current-weather-light.png
+│   ├── current-weather-dark.png
+│   ├── error.png
+│   └── forecast.png
+└── README.md
+```
 
 ---
 
 ## 🚀 Getting Started
 
-### Clone the repository
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/eswarsamanthula/Weather-App.git
-cd Weather-App
+git clone https://github.com/eswarsamanthula/Weather-Insight-Web.git
+cd Weather-Insight-Web
 ```
 
-🙌 Contributing
-Feel free to fork this repo and submit pull requests with improvements, bug fixes, or feature additions!
+### 2. Install dependencies
 
-📬 Contact
-Created by Eswar Samanthula
-📧 Email: eswarsamanthulas@gmail.com
-=======
-# Weather App - React + Vite
+```bash
+npm install
+```
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### 3. Start the development server
 
-Currently, two official plugins are available:
+```bash
+npm run dev
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## API Key Security
+## 🔐 API Key Setup
 
-This project uses environment variables to securely store API keys. This approach prevents sensitive information from being exposed in your source code or committed to version control.
+To secure your OpenWeather API key during local development:
 
-### How it works
+1. Create a `.env` file in the root directory.
+2. Add the following line:
 
-1. The OpenWeather API key is stored in a `.env` file at the root of the project
-2. The `.env` file is listed in `.gitignore` to prevent it from being committed to version control
-3. The API key is accessed in the code using `import.meta.env.VITE_OPENWEATHER_API_KEY`
-
-### For developers
-
-If you're setting up this project for development:
-
-1. Create a `.env` file in the root directory if it doesn't exist
-2. Add your OpenWeather API key in the following format:
-   ```
+   ```env
    VITE_OPENWEATHER_API_KEY=your_api_key_here
    ```
-3. Restart your development server if it's already running
 
-### Important notes
+3. Make sure `.env` is listed in `.gitignore` (already configured).
+4. Restart the dev server if it’s running.
 
-- Never commit the `.env` file to version control
-- When deploying, make sure to set the environment variables in your hosting platform
-- The `VITE_` prefix is required for Vite to expose the variable to the client-side code
+🔒 **Note**: Never commit your `.env` file to GitHub. When deploying, configure your hosting provider to use the environment variable.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
->>>>>>> 97189c9 (Initial commit with Weather App files)
+## 🙌 Contributing
+
+Contributions are welcome! Feel free to fork the repo, suggest features, report bugs, or submit pull requests.
+
+---
+
+## 📬 Contact
+
+Created with ❤️ by **Eswar Samanthula**  
+📧 [eswarsamanthulas@gmail.com](mailto:eswarsamanthulas@gmail.com)
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
