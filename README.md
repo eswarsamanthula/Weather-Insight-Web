@@ -8,7 +8,7 @@
 
 A sleek, modern weather app built with vanilla JavaScript and Vite that delivers real-time weather data, geolocation support, dynamic backgrounds, and a responsive interface. The app integrates the OpenWeatherMap API and prioritizes both functionality and design.
 
-🔗 **Live Demo:** [eswarsamanthula.github.io/Weather-Insight-Web](https://eswarsamanthula.github.io/Weather-Insight-Web)
+🔗 **Live Demo:** [Weather-Insight-Wed](https://weather-insight-wed.netlify.app/)
 
 ---
 
