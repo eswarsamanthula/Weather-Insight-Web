@@ -1,10 +1,15 @@
-import { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import { useState } from 'react';
+import styled, { keyframes } from 'styled-components';
 import WeatherCard from './components/WeatherCard';
 import SearchBox from './components/SearchBox';
 import WeatherBackground from './components/WeatherBackground';
 import { fetchWeatherData, fetchWeatherByCoords } from './services/weatherService';
 import './App.css';
+
+const fadeUp = keyframes`
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+`;
 
 const AppContainer = styled.div`
   min-height:100vh; padding:2rem;
@@ -15,10 +20,27 @@ const AppContent = styled.div`
   max-width:740px; margin:0 auto;
 `;
 const Header = styled.header`
-  text-align:center;
-  margin-bottom:2.5rem;
-  animation:fadeUp 0.5s var(--ease) both;
+  text-align:center; margin-bottom:2.5rem;
+  animation:${fadeUp} 0.5s var(--ease) both;
+  position:relative;
 `;
+
+// Ghost city name behind everything
+const GhostCity = styled.div`
+  position:fixed;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(4rem, 18vw, 16rem);
+  letter-spacing:0.08em;
+  color:rgba(56,189,248,0.03);
+  white-space:nowrap;
+  pointer-events:none;
+  z-index:1;
+  user-select:none;
+  transition:opacity 1.5s ease;
+`;
+
 const Title = styled.h1`
   font-family:'Bebas Neue',sans-serif;
   font-size:3.5rem; letter-spacing:0.12em;
@@ -34,8 +56,7 @@ const Subtitle = styled.p`
 const Spinner = styled.div`
   margin:3rem auto; width:36px; height:36px;
   border:3px solid rgba(56,189,248,0.15);
-  border-top-color:var(--primary);
-  border-radius:50%;
+  border-top-color:var(--primary); border-radius:50%;
   animation:spin 0.8s linear infinite;
 `;
 const ErrorMsg = styled.div`
@@ -43,8 +64,7 @@ const ErrorMsg = styled.div`
   background:rgba(248,113,113,0.08);
   border:1px solid rgba(248,113,113,0.2);
   border-radius:14px; color:var(--error);
-  text-align:center; max-width:420px;
-  font-size:0.9rem;
+  text-align:center; max-width:420px; font-size:0.9rem;
 `;
 const Footer = styled.footer`
   text-align:center; padding:2rem; margin-top:2rem;
@@ -80,7 +100,7 @@ export default function App() {
     }
   };
 
-  const toggleUnits = (u) => {
+  const toggleUnits = u => {
     setUnits(u);
     if (weatherData) handleSearch(weatherData.city);
   };
@@ -88,6 +108,7 @@ export default function App() {
   return (
     <AppContainer>
       <WeatherBackground weatherData={weatherData} />
+      {weatherData && <GhostCity>{weatherData.city}</GhostCity>}
       <AppContent>
         <Header>
           <Title>Weather Insight</Title>
@@ -96,10 +117,15 @@ export default function App() {
         <SearchBox onSearch={handleSearch} />
         {loading && <Spinner />}
         {error && <ErrorMsg>{error}</ErrorMsg>}
-        {weatherData && <WeatherCard data={weatherData} units={units} onUnitsChange={toggleUnits} />}
+        {weatherData && (
+          <WeatherCard data={weatherData} units={units} onUnitsChange={toggleUnits} />
+        )}
       </AppContent>
       <Footer>
-        <p>Data by <a href="https://openweathermap.org" target="_blank" rel="noopener noreferrer">OpenWeather</a> · Crafted by <a href="https://github.com/eswarsamanthula/Weather-Insight-Web" target="_blank" rel="noopener noreferrer">Eswar</a></p>
+        <p>
+          Data by <a href="https://openweathermap.org" target="_blank" rel="noopener noreferrer">OpenWeather</a>
+          {' · '}Crafted by <a href="https://github.com/eswarsamanthula/Weather-Insight-Web" target="_blank" rel="noopener noreferrer">Eswar</a>
+        </p>
       </Footer>
     </AppContainer>
   );
