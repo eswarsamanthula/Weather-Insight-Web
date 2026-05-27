@@ -99,7 +99,7 @@ export default function App() {
         {weatherData && <WeatherCard data={weatherData} units={units} onUnitsChange={toggleUnits} />}
       </AppContent>
       <Footer>
-        <p>Data by <a href="https://openweathermap.org" target="_blank" rel="noopener noreferrer">OpenWeather</a></p>
+        <p>Data by <a href="https://openweathermap.org" target="_blank" rel="noopener noreferrer">OpenWeather</a> · Crafted by <a href="https://github.com/eswarsamanthula/Weather-Insight-Web" target="_blank" rel="noopener noreferrer">Eswar</a></p>
       </Footer>
     </AppContainer>
   );
