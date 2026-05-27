@@ -7,168 +7,82 @@ import { fetchWeatherData, fetchWeatherByCoords } from './services/weatherServic
 import './App.css';
 
 const AppContainer = styled.div`
-  min-height: 100vh;
-  padding: 2rem;
-  position: relative;
-  overflow: hidden;
+  min-height:100vh; padding:2rem;
+  position:relative; overflow:hidden;
 `;
-
 const AppContent = styled.div`
-  position: relative;
-  z-index: 10;
-  max-width: 800px;
-  margin: 0 auto;
+  position:relative; z-index:10;
+  max-width:740px; margin:0 auto;
 `;
-
 const Header = styled.header`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 2rem;
-  text-align: center;
+  text-align:center;
+  margin-bottom:2.5rem;
+  animation:fadeUp 0.5s var(--ease) both;
 `;
-
 const Title = styled.h1`
-  color: var(--primary-color);
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin: 0;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  font-family:'Bebas Neue',sans-serif;
+  font-size:3.5rem; letter-spacing:0.12em;
+  background:linear-gradient(135deg,#e2e8f0 40%,var(--primary) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  line-height:1;
 `;
-
 const Subtitle = styled.p`
-  color: var(--text-color-light);
-  font-size: 1.1rem;
-  margin: 0.5rem 0 1.5rem;
+  font-size:0.8rem; color:var(--text-muted);
+  letter-spacing:0.15em; text-transform:uppercase;
+  margin-top:6px; font-weight:400;
 `;
-
-const ThemeToggle = styled.button`
-  background: transparent;
-  border: none;
-  color: var(--text-color);
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-    transform: rotate(15deg);
-  }
+const Spinner = styled.div`
+  margin:3rem auto; width:36px; height:36px;
+  border:3px solid rgba(56,189,248,0.15);
+  border-top-color:var(--primary);
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
 `;
-
-const LoadingSpinner = styled.div`
-  margin: 2rem auto;
-  width: 40px;
-  height: 40px;
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-top-color: var(--primary-color);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
+const ErrorMsg = styled.div`
+  margin:2rem auto; padding:1rem 1.5rem;
+  background:rgba(248,113,113,0.08);
+  border:1px solid rgba(248,113,113,0.2);
+  border-radius:14px; color:var(--error);
+  text-align:center; max-width:420px;
+  font-size:0.9rem;
 `;
-
-const ErrorMessage = styled.div`
-  margin: 2rem auto;
-  padding: 1rem;
-  background-color: var(--error-background);
-  border: 1px solid var(--error-border);
-  border-radius: 10px;
-  color: var(--error-text);
-  text-align: center;
-  max-width: 400px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-`;
-
 const Footer = styled.footer`
-  text-align: center;
-  padding: 2rem;
-  color: var(--text-color-light);
-  font-size: 0.9rem;
-  margin-top: 2rem;
-
-  a {
-    color: var(--primary-color);
-    text-decoration: none;
-    transition: color 0.3s ease;
-
-    &:hover {
-      color: var(--primary-light);
-    }
-  }
+  text-align:center; padding:2rem; margin-top:2rem;
+  color:var(--text-muted); font-size:0.8rem;
+  a { color:var(--primary); text-decoration:none; opacity:0.8;
+    &:hover { opacity:1; } }
 `;
 
-function App() {
+export default function App() {
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
   const [units, setUnits] = useState('metric');
 
-  useEffect(() => {
-    // Load theme preference
-    const savedTheme = localStorage.getItem('weatherAppTheme');
-    if (savedTheme === 'dark') {
-      setDarkMode(true);
-      document.body.classList.add('dark-theme');
-    }
-  }, []);
-
-  const handleSearch = async (searchInput) => {
+  const handleSearch = async (input) => {
     try {
-      setLoading(true);
-      setError(null);
-      
+      setLoading(true); setError(null);
       let data;
-      if (typeof searchInput === 'object' && searchInput.lat && searchInput.lon) {
-        // Handle coordinates
-        data = await fetchWeatherByCoords(searchInput.lat, searchInput.lon, units);
-      } else if (searchInput === 'current') {
-        // Handle error case
-        throw new Error('Location access denied or not supported');
+      if (typeof input === 'object' && input.lat) {
+        data = await fetchWeatherByCoords(input.lat, input.lon, units);
+      } else if (input === 'current') {
+        throw new Error('Location access denied');
       } else {
-        // Handle city name
-        data = await fetchWeatherData(searchInput, units);
+        data = await fetchWeatherData(input, units);
       }
-      
       setWeatherData(data);
-    } catch (error) {
-      setError(error.message === 'Location access denied or not supported' 
-        ? 'Unable to get your location. Please allow location access or search for a city manually.'
-        : 'City not found. Please try another location.');
+    } catch (e) {
+      setError(e.message === 'Location access denied'
+        ? 'Allow location access or search a city manually.'
+        : 'City not found. Try another location.');
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleTheme = () => {
-    setDarkMode(!darkMode);
-    if (!darkMode) {
-      document.body.classList.add('dark-theme');
-      localStorage.setItem('weatherAppTheme', 'dark');
-    } else {
-      document.body.classList.remove('dark-theme');
-      localStorage.setItem('weatherAppTheme', 'light');
-    }
-  };
-
-  const toggleUnits = (newUnits) => {
-    setUnits(newUnits);
-    if (weatherData) {
-      handleSearch(weatherData.city);
-    }
+  const toggleUnits = (u) => {
+    setUnits(u);
+    if (weatherData) handleSearch(weatherData.city);
   };
 
   return (
@@ -177,27 +91,16 @@ function App() {
       <AppContent>
         <Header>
           <Title>Weather Insight</Title>
-          <Subtitle>Your Daily Forecast at a Glance</Subtitle>
-          <ThemeToggle onClick={toggleTheme}>
-            <i className={`fas fa-${darkMode ? 'sun' : 'moon'}`}></i>
-          </ThemeToggle>
+          <Subtitle>Real-time global forecast</Subtitle>
         </Header>
         <SearchBox onSearch={handleSearch} />
-        {loading && <LoadingSpinner />}
-        {error && <ErrorMessage>{error}</ErrorMessage>}
-        {weatherData && (
-          <WeatherCard
-            data={weatherData}
-            units={units}
-            onUnitsChange={toggleUnits}
-          />
-        )}
+        {loading && <Spinner />}
+        {error && <ErrorMsg>{error}</ErrorMsg>}
+        {weatherData && <WeatherCard data={weatherData} units={units} onUnitsChange={toggleUnits} />}
       </AppContent>
       <Footer>
-        <p>Weather data powered by <a href="https://openweathermap.org" target="_blank" rel="noopener noreferrer">OpenWeather</a></p>
+        <p>Data by <a href="https://openweathermap.org" target="_blank" rel="noopener noreferrer">OpenWeather</a></p>
       </Footer>
     </AppContainer>
   );
 }
-
-export default App;

@@ -1,132 +1,119 @@
 import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-const BackgroundContainer = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  overflow: hidden;
-  transition: background 0.5s ease;
-  background: ${props => props.background};
+const BG = styled.div`
+  position:fixed; inset:0; z-index:-1; overflow:hidden;
+  transition:background 2s ease;
+  background:${p => p.$bg};
 `;
 
-const ParticlesContainer = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-`;
+const gradients = {
+  '01d': 'radial-gradient(ellipse at 15% 15%, #0f3460 0%, #0a1f3f 40%, #020c1b 100%)',
+  '01n': 'radial-gradient(ellipse at 50% 0%, #0b0723 0%, #020c1b 65%)',
+  '02d': 'radial-gradient(ellipse at 20% 10%, #0e2d52 0%, #091c38 50%, #020c1b 100%)',
+  '02n': 'radial-gradient(ellipse at 50% 0%, #080f28 0%, #020c1b 65%)',
+  '03d': 'radial-gradient(ellipse at 50% 0%, #111d35 0%, #020c1b 70%)',
+  '03n': 'radial-gradient(ellipse at 50% 0%, #080d1e 0%, #020c1b 70%)',
+  '04d': 'radial-gradient(ellipse at 50% 0%, #0e1829 0%, #020c1b 70%)',
+  '04n': 'radial-gradient(ellipse at 50% 0%, #07090f 0%, #020c1b 70%)',
+  '09d': 'radial-gradient(ellipse at 40% 0%, #071829 0%, #030e1e 60%, #020c1b 100%)',
+  '09n': 'radial-gradient(ellipse at 50% 0%, #040b15 0%, #020c1b 70%)',
+  '10d': 'radial-gradient(ellipse at 30% 0%, #071829 0%, #030e1e 60%, #020c1b 100%)',
+  '10n': 'radial-gradient(ellipse at 50% 0%, #040b15 0%, #020c1b 70%)',
+  '11d': 'radial-gradient(ellipse at 50% 0%, #0a0820 0%, #020c1b 70%)',
+  '11n': 'radial-gradient(ellipse at 50% 0%, #06051a 0%, #020c1b 70%)',
+  '13d': 'radial-gradient(ellipse at 50% 0%, #111e35 0%, #020c1b 70%)',
+  '13n': 'radial-gradient(ellipse at 50% 0%, #080d1e 0%, #020c1b 70%)',
+  '50d': 'radial-gradient(ellipse at 50% 0%, #0e1523 0%, #020c1b 70%)',
+  '50n': 'radial-gradient(ellipse at 50% 0%, #070b13 0%, #020c1b 70%)',
+  default: 'radial-gradient(ellipse at 15% 15%, #0f3460 0%, #0a1f3f 40%, #020c1b 100%)',
+};
 
-function WeatherBackground({ weatherData }) {
-  const particlesRef = useRef(null);
+const typeMap = {
+  '01d': 'sunny', '01n': 'night', '02d': 'partly', '02n': 'night',
+  '03d': 'cloudy', '03n': 'cloudy', '04d': 'cloudy', '04n': 'cloudy',
+  '09d': 'rain', '09n': 'rain', '10d': 'rain', '10n': 'rain',
+  '11d': 'storm', '11n': 'storm', '13d': 'snow', '13n': 'snow',
+  '50d': 'mist', '50n': 'mist',
+};
 
-  const getBackgroundStyle = (iconCode) => {
-    const backgrounds = {
-      // Clear sky
-      '01d': 'linear-gradient(135deg, #00b4db, #0083b0)',
-      '01n': 'linear-gradient(135deg, #1a1a2e, #16213e)',
-      // Few clouds
-      '02d': 'linear-gradient(135deg, #89f7fe, #66a6ff)',
-      '02n': 'linear-gradient(135deg, #2c3e50, #3498db)',
-      // Scattered clouds
-      '03d': 'linear-gradient(135deg, #bdc3c7, #2c3e50)',
-      '03n': 'linear-gradient(135deg, #2c3e50, #34495e)',
-      // Broken clouds
-      '04d': 'linear-gradient(135deg, #7f7fd5, #86a8e7)',
-      '04n': 'linear-gradient(135deg, #2c3e50, #4b6cb7)',
-      // Shower rain
-      '09d': 'linear-gradient(135deg, #4b6cb7, #182848)',
-      '09n': 'linear-gradient(135deg, #182848, #000428)',
-      // Rain
-      '10d': 'linear-gradient(135deg, #4b6cb7, #182848)',
-      '10n': 'linear-gradient(135deg, #182848, #000428)',
-      // Thunderstorm
-      '11d': 'linear-gradient(135deg, #373b44, #4286f4)',
-      '11n': 'linear-gradient(135deg, #000428, #004e92)',
-      // Snow
-      '13d': 'linear-gradient(135deg, #e6dada, #274046)',
-      '13n': 'linear-gradient(135deg, #2c3e50, #4b6cb7)',
-      // Mist
-      '50d': 'linear-gradient(135deg, #bdc3c7, #2c3e50)',
-      '50n': 'linear-gradient(135deg, #2c3e50, #34495e)',
-      // Default background for initial load (clear day)
-      'default': 'linear-gradient(135deg, #00b4db, #0083b0)',
-    };
-    return backgrounds[iconCode] || backgrounds['default'];
-  };
-
-  const createParticles = (iconCode) => {
-    const container = particlesRef.current;
-    if (!container) return;
-
-    // Clear existing particles
-    container.innerHTML = '';
-
-    const particleCount = 50;
-    const particles = {
-      '01d': { type: 'sun', count: 1 },
-      '01n': { type: 'stars', count: 100 },
-      '02d': { type: 'clouds', count: 5 },
-      '02n': { type: 'clouds', count: 5 },
-      '03d': { type: 'clouds', count: 8 },
-      '03n': { type: 'clouds', count: 8 },
-      '04d': { type: 'clouds', count: 10 },
-      '04n': { type: 'clouds', count: 10 },
-      '09d': { type: 'rain', count: 100 },
-      '09n': { type: 'rain', count: 100 },
-      '10d': { type: 'rain', count: 100 },
-      '10n': { type: 'rain', count: 100 },
-      '11d': { type: 'lightning', count: 1 },
-      '11n': { type: 'lightning', count: 1 },
-      '13d': { type: 'snow', count: 100 },
-      '13n': { type: 'snow', count: 100 },
-      '50d': { type: 'mist', count: 20 },
-      '50n': { type: 'mist', count: 20 },
-    };
-
-    const weatherParticles = particles[iconCode] || particles['01d'];
-
-    for (let i = 0; i < weatherParticles.count; i++) {
-      const particle = document.createElement('div');
-      particle.className = `weather-particle ${weatherParticles.type}`;
-      
-      // Random positioning
-      particle.style.left = `${Math.random() * 100}%`;
-      particle.style.top = `${Math.random() * 100}%`;
-      
-      // Random size for clouds
-      if (weatherParticles.type === 'clouds') {
-        const size = Math.random() * 100 + 50;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size * 0.6}px`;
-      }
-      
-      // Random delay for animations
-      particle.style.animationDelay = `${Math.random() * 5}s`;
-      
-      container.appendChild(particle);
-    }
-  };
+export default function WeatherBackground({ weatherData }) {
+  const ref = useRef(null);
+  const icon = weatherData?.icon || 'default';
+  const type = typeMap[icon] || 'sunny';
 
   useEffect(() => {
-    if (weatherData && weatherData.icon) {
-      createParticles(weatherData.icon);
-    } else {
-      // Create default particles for initial load (clear day)
-      createParticles('01d');
+    const c = ref.current;
+    if (!c) return;
+    c.innerHTML = '';
+
+    if (type === 'sunny') {
+      const orb = document.createElement('div');
+      orb.style.cssText = `position:absolute;top:-80px;left:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(251,191,36,0.12) 0%,transparent 70%);border-radius:50%;animation:float 8s ease-in-out infinite;`;
+      c.appendChild(orb);
+      for (let i = 0; i < 6; i++) {
+        const ray = document.createElement('div');
+        ray.style.cssText = `position:absolute;top:60px;left:60px;width:180px;height:1.5px;background:linear-gradient(90deg,rgba(251,191,36,0.2),transparent);transform-origin:0 50%;transform:rotate(${i * 60}deg);border-radius:2px;`;
+        c.appendChild(ray);
+      }
     }
-  }, [weatherData]);
+
+    if (type === 'night' || type === 'partly') {
+      for (let i = 0; i < 150; i++) {
+        const s = document.createElement('div');
+        const sz = Math.random() * 2.5 + 0.5;
+        s.style.cssText = `position:absolute;left:${Math.random() * 100}%;top:${Math.random() * 75}%;width:${sz}px;height:${sz}px;background:white;border-radius:50%;animation:star-twinkle ${1.5 + Math.random() * 3}s ease-in-out infinite;animation-delay:${Math.random() * 5}s;`;
+        c.appendChild(s);
+      }
+    }
+
+    if (type === 'cloudy' || type === 'partly') {
+      for (let i = 0; i < 5; i++) {
+        const cl = document.createElement('div');
+        const sz = 100 + Math.random() * 130;
+        const dur = 30 + Math.random() * 25;
+        cl.style.cssText = `position:absolute;top:${Math.random() * 35}%;left:-250px;width:${sz}px;height:${sz * 0.5}px;background:rgba(148,163,184,0.06);border-radius:60px;filter:blur(4px);animation:cloud-move ${dur}s linear infinite;animation-delay:-${Math.random() * dur}s;`;
+        c.appendChild(cl);
+      }
+    }
+
+    if (type === 'rain' || type === 'storm') {
+      const count = type === 'storm' ? 70 : 90;
+      for (let i = 0; i < count; i++) {
+        const d = document.createElement('div');
+        const dur = 0.55 + Math.random() * 0.7;
+        d.style.cssText = `position:absolute;left:${Math.random() * 100}%;top:-30px;width:1.5px;height:${12 + Math.random() * 12}px;background:linear-gradient(180deg,transparent,rgba(147,197,253,0.65));border-radius:1px;animation:rain-fall ${dur}s linear infinite;animation-delay:-${Math.random() * 2}s;`;
+        c.appendChild(d);
+      }
+      if (type === 'storm') {
+        const fl = document.createElement('div');
+        fl.style.cssText = `position:absolute;inset:0;background:rgba(129,140,248,0.06);animation:lightning-flash ${3 + Math.random() * 5}s linear infinite;`;
+        c.appendChild(fl);
+      }
+    }
+
+    if (type === 'snow') {
+      for (let i = 0; i < 70; i++) {
+        const f = document.createElement('div');
+        const sz = 2 + Math.random() * 5;
+        f.style.cssText = `position:absolute;left:${Math.random() * 100}%;top:-20px;width:${sz}px;height:${sz}px;background:rgba(224,242,254,0.85);border-radius:50%;filter:blur(0.5px);animation:snow-drift ${4 + Math.random() * 7}s linear infinite;animation-delay:-${Math.random() * 10}s;`;
+        c.appendChild(f);
+      }
+    }
+
+    if (type === 'mist') {
+      for (let i = 0; i < 10; i++) {
+        const m = document.createElement('div');
+        m.style.cssText = `position:absolute;top:${8 + i * 9}%;left:-250px;width:${180 + Math.random() * 200}px;height:${15 + Math.random() * 25}px;background:rgba(148,163,184,0.06);border-radius:60px;filter:blur(10px);animation:cloud-move ${22 + Math.random() * 18}s linear infinite;animation-delay:-${Math.random() * 25}s;`;
+        c.appendChild(m);
+      }
+    }
+  }, [icon, type]);
 
   return (
-    <BackgroundContainer background={weatherData ? getBackgroundStyle(weatherData.icon) : getBackgroundStyle('default')}>
-      <ParticlesContainer ref={particlesRef} />
-    </BackgroundContainer>
+    <BG $bg={gradients[icon] || gradients.default}>
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 80% 80%, rgba(56,189,248,0.03) 0%, transparent 60%)' }} />
+      <div ref={ref} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />
+    </BG>
   );
 }
-
-export default WeatherBackground;
