@@ -16,16 +16,13 @@ const AppContainer = styled.div`
   padding: 1.25rem;
   position: relative;
   overflow: hidden;
-
-  @media (min-width: 480px) {
-    padding: 2rem;
-  }
+  @media (min-width: 480px) { padding: 2rem; }
 `;
 
 const AppContent = styled.div`
   position: relative;
   z-index: 10;
-  max-width: 740px;
+  max-width: 800px;
   margin: 0 auto;
   width: 100%;
 `;
@@ -36,16 +33,14 @@ const Header = styled.header`
   animation: ${fadeUp} 0.5s var(--ease) both;
 `;
 
-/* Giant ghost city name — floats behind the card */
 const GhostCity = styled.div`
   position: fixed;
-  top: 50%;
-  left: 50%;
+  top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(3rem, 18vw, 16rem);
   letter-spacing: 0.08em;
-  color: rgba(56, 189, 248, 0.03);
+  color: rgba(56, 189, 248, 0.04);
   white-space: nowrap;
   pointer-events: none;
   z-index: 1;
@@ -55,28 +50,100 @@ const GhostCity = styled.div`
 
 const Title = styled.h1`
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(2.2rem, 8vw, 3.5rem);
-  letter-spacing: 0.12em;
-  background: linear-gradient(135deg, #e2e8f0 40%, var(--primary) 100%);
+  font-size: clamp(2.4rem, 8vw, 3.8rem);
+  letter-spacing: 0.14em;
+  background: linear-gradient(135deg, #e2e8f0 30%, var(--primary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   line-height: 1;
 `;
 
 const Subtitle = styled.p`
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
-  letter-spacing: 0.15em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  margin-top: 6px;
+  margin-top: 7px;
   font-weight: 400;
+`;
+
+/* Skeleton loader */
+const SkeletonCard = styled.div`
+  background: rgba(10,16,30,0.72);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.07);
+  padding: 2rem;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+`;
+const SkeletonLine = styled.div`
+  height: ${p => p.$h || '14px'};
+  width: ${p => p.$w || '100%'};
+  background: rgba(56,189,248,0.08);
+  border-radius: 6px;
+  margin-bottom: ${p => p.$mb || '12px'};
+`;
+
+/* Welcome state */
+const WelcomeWrap = styled.div`
+  text-align: center;
+  padding: 3rem 1.5rem;
+  animation: ${fadeUp} 0.6s var(--ease) both;
+  animation-delay: 0.3s;
+  opacity: 0;
+  animation-fill-mode: forwards;
+`;
+const WelcomeIcon = styled.div`
+  font-size: 3.5rem;
+  color: var(--primary);
+  opacity: 0.5;
+  margin-bottom: 1.25rem;
+  filter: drop-shadow(0 0 24px var(--primary-glow));
+  animation: float 5s ease-in-out infinite;
+`;
+const WelcomeTitle = styled.p`
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  letter-spacing: 0.1em;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+`;
+const WelcomeSub = styled.p`
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  max-width: 280px;
+  margin: 0 auto;
+  line-height: 1.6;
+`;
+const QuickSuggestions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 1.5rem;
+`;
+const SuggestChip = styled.button`
+  background: rgba(56,189,248,0.07);
+  border: 1px solid rgba(56,189,248,0.15);
+  border-radius: 20px;
+  padding: 6px 14px;
+  color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  &:hover {
+    background: rgba(56,189,248,0.14);
+    border-color: rgba(56,189,248,0.35);
+    color: var(--primary);
+    transform: translateY(-1px);
+  }
 `;
 
 const Spinner = styled.div`
   margin: 3rem auto;
-  width: 36px;
-  height: 36px;
-  border: 3px solid rgba(56, 189, 248, 0.15);
+  width: 36px; height: 36px;
+  border: 3px solid rgba(56,189,248,0.12);
   border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -84,14 +151,20 @@ const Spinner = styled.div`
 
 const ErrorMsg = styled.div`
   margin: 2rem auto;
-  padding: 1rem 1.25rem;
-  background: rgba(248, 113, 113, 0.08);
-  border: 1px solid rgba(248, 113, 113, 0.2);
+  padding: 1.1rem 1.5rem;
+  background: rgba(248,113,113,0.07);
+  border: 1px solid rgba(248,113,113,0.18);
   border-radius: 14px;
   color: var(--error);
   text-align: center;
   font-size: 0.88rem;
   max-width: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  animation: ${fadeUp} 0.3s ease both;
+  i { font-size: 1rem; opacity: 0.8; }
 `;
 
 const Footer = styled.footer`
@@ -100,14 +173,17 @@ const Footer = styled.footer`
   margin-top: 1.5rem;
   color: var(--text-muted);
   font-size: 0.78rem;
-
+  letter-spacing: 0.03em;
   a {
     color: var(--primary);
     text-decoration: none;
-    opacity: 0.8;
+    opacity: 0.75;
+    transition: opacity 0.2s;
     &:hover { opacity: 1; }
   }
 `;
+
+const CITIES = ['New York', 'Tokyo', 'London', 'Mumbai', 'Sydney', 'Paris'];
 
 export default function App() {
   const [weatherData, setWeatherData] = useState(null);
@@ -119,7 +195,6 @@ export default function App() {
     try {
       setLoading(true);
       setError(null);
-
       let data;
       if (typeof input === 'object' && input.lat) {
         data = await fetchWeatherByCoords(input.lat, input.lon, units);
@@ -128,13 +203,12 @@ export default function App() {
       } else {
         data = await fetchWeatherData(input, units);
       }
-
       setWeatherData(data);
     } catch (e) {
       setError(
         e.message === 'Location access denied'
           ? 'Allow location access or search a city manually.'
-          : 'City not found. Try another location.'
+          : 'City not found. Please try another location.'
       );
     } finally {
       setLoading(false);
@@ -149,8 +223,6 @@ export default function App() {
   return (
     <AppContainer>
       <WeatherBackground weatherData={weatherData} />
-
-      {/* Ghost city name behind everything */}
       {weatherData && <GhostCity>{weatherData.city}</GhostCity>}
 
       <AppContent>
@@ -161,29 +233,53 @@ export default function App() {
 
         <SearchBox onSearch={handleSearch} />
 
-        {loading && <Spinner />}
-        {error && <ErrorMsg>{error}</ErrorMsg>}
+        {loading && (
+          <SkeletonCard>
+            <SkeletonLine $h="40px" $w="55%" $mb="8px" />
+            <SkeletonLine $h="14px" $w="30%" $mb="24px" />
+            <SkeletonLine $h="80px" $w="40%" $mb="20px" />
+            <SkeletonLine $h="12px" $w="100%" $mb="8px" />
+            <SkeletonLine $h="12px" $w="80%" $mb="24px" />
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'12px' }}>
+              {[...Array(4)].map((_,i) => <SkeletonLine key={i} $h="64px" $mb="0" />)}
+            </div>
+          </SkeletonCard>
+        )}
 
-        {weatherData && (
-          <WeatherCard
-            data={weatherData}
-            units={units}
-            onUnitsChange={toggleUnits}
-          />
+        {error && !loading && (
+          <ErrorMsg>
+            <i className="fas fa-circle-exclamation" />
+            {error}
+          </ErrorMsg>
+        )}
+
+        {!loading && !error && !weatherData && (
+          <WelcomeWrap>
+            <WelcomeIcon><i className="fas fa-cloud-sun" /></WelcomeIcon>
+            <WelcomeTitle>Check the Weather</WelcomeTitle>
+            <WelcomeSub>Search any city worldwide to get real-time forecasts, hourly trends and 5-day outlooks.</WelcomeSub>
+            <QuickSuggestions>
+              {CITIES.map(city => (
+                <SuggestChip key={city} onClick={() => handleSearch(city)}>
+                  {city}
+                </SuggestChip>
+              ))}
+            </QuickSuggestions>
+          </WelcomeWrap>
+        )}
+
+        {weatherData && !loading && (
+          <WeatherCard data={weatherData} units={units} onUnitsChange={toggleUnits} />
         )}
       </AppContent>
 
       <Footer>
         <p>
           Data by{' '}
-          <a href="https://openweathermap.org" target="_blank" rel="noopener noreferrer">
-            OpenWeather
-          </a>
+          <a href="https://openweathermap.org" target="_blank" rel="noopener noreferrer">OpenWeather</a>
           {' · '}
           Crafted by{' '}
-          <a href="https://github.com/eswarsamanthula/Weather-Insight-Web" target="_blank" rel="noopener noreferrer">
-            Eswar
-          </a>
+          <a href="https://github.com/eswarsamanthula/Weather-Insight-Web" target="_blank" rel="noopener noreferrer">Eswar</a>
         </p>
       </Footer>
     </AppContainer>
