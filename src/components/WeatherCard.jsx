@@ -417,13 +417,13 @@ function SunArc({ sunrise, sunset }) {
   const now=new Date(); const nowMins=now.getHours()*60+now.getMinutes();
   const rMins=toMins(sunrise),sMins=toMins(sunset),total=sMins-rMins||1;
   const pct=Math.min(Math.max((nowMins-rMins)/total,0),1);
-  const cx=120,cy=90,r=70;
+  const cx=120,cy=105,r=78;
   const startX=cx-r,endX=cx+r;
   const sunAngle=Math.PI*(1-pct);
   const sunX=cx+r*Math.cos(sunAngle),sunY=cy-r*Math.sin(sunAngle);
   return (
     <SunArcWrap>
-      <svg viewBox="0 0 240 100" style={{width:'100%',maxWidth:300,display:'block',margin:'0 auto 12px'}}>
+      <svg viewBox="0 0 240 130" style={{width:'100%',maxWidth:300,display:'block',margin:'0 auto 12px'}}>
         <defs>
           <linearGradient id="arcGrad" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="rgba(251,191,36,0.15)"/>
@@ -436,10 +436,11 @@ function SunArc({ sunrise, sunset }) {
         <path d={`M ${startX} ${cy} A ${r} ${r} 0 0 1 ${sunX} ${sunY}`}
           fill="none" stroke="url(#arcGrad)" strokeWidth="2.5" strokeLinecap="round"/>
         <line x1={startX-8} y1={cy} x2={endX+8} y2={cy} stroke="rgba(255,255,255,0.07)" strokeWidth="1"/>
-        <circle cx={sunX} cy={sunY} r="6" fill="var(--gold)" opacity="0.9"/>
+        <filter id="sunGlow"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <circle cx={sunX} cy={sunY} r="9" fill="var(--gold)" filter="url(#sunGlow)" opacity="1"/>
         <circle cx={sunX} cy={sunY} r="10" fill="rgba(251,191,36,0.2)"/>
-        <text x={startX} y={cy+14} textAnchor="middle" fill="rgba(100,116,139,0.8)" fontSize="7" fontFamily="DM Mono">{sunrise}</text>
-        <text x={endX}   y={cy+14} textAnchor="middle" fill="rgba(100,116,139,0.8)" fontSize="7" fontFamily="DM Mono">{sunset}</text>
+        <text x={startX} y={cy+18} textAnchor="middle" fill="rgba(100,116,139,0.8)" fontSize="7" fontFamily="DM Mono">{sunrise}</text>
+        <text x={endX}   y={cy+18} textAnchor="middle" fill="rgba(100,116,139,0.8)" fontSize="7" fontFamily="DM Mono">{sunset}</text>
       </svg>
       <SunRow>
         <SunItem>
