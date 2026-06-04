@@ -2,10 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { formatDate } from '../utils/dateUtils';
 
-const fadeUp   = keyframes`from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}`;
-const neonPulse = keyframes`
+// ── Keyframes ────────────────────────────────────────────────────────────────
+const fadeUp     = keyframes`from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}`;
+const stagger    = keyframes`from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}`;
+const neonPulse  = keyframes`
   0%,100%{text-shadow:0 0 8px rgba(56,189,248,0.5),0 0 20px rgba(56,189,248,0.3)}
-  50%{text-shadow:0 0 18px rgba(56,189,248,0.9),0 0 40px rgba(129,140,248,0.5)}
+  50%{text-shadow:0 0 18px rgba(56,189,248,0.9),0 0 40px rgba(129,140,248,0.5),0 0 60px rgba(56,189,248,0.2)}
 `;
 const auroraMove = keyframes`
   0%,100%{transform:scaleX(1) scaleY(1) translateX(0);opacity:0.25}
@@ -14,12 +16,30 @@ const auroraMove = keyframes`
 `;
 const barGrow    = keyframes`from{width:0}to{width:var(--w)}`;
 const compassSpin= keyframes`from{transform:rotate(0deg)}to{transform:rotate(360deg)}`;
-const stagger    = keyframes`from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}`;
+const iconSpin   = keyframes`from{transform:rotate(0deg)}to{transform:rotate(360deg)}`;
+const iconPulse  = keyframes`0%,100%{transform:scale(1)}50%{transform:scale(1.12)}`;
+const iconFloat  = keyframes`0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-8px) rotate(5deg)}`;
+const ringFill   = keyframes`from{stroke-dashoffset:var(--full)}to{stroke-dashoffset:var(--offset)}`;
+const flipIn     = keyframes`
+  0%{transform:perspective(600px) rotateY(-90deg);opacity:0}
+  100%{transform:perspective(600px) rotateY(0deg);opacity:1}
+`;
+const rainDrop3d = keyframes`
+  0%{transform:translateY(-30px) translateZ(0px) rotate(12deg);opacity:0}
+  10%{opacity:0.7}
+  100%{transform:translateY(105vh) translateZ(-60px) rotate(12deg);opacity:0}
+`;
+const snowDrift3d= keyframes`
+  0%{transform:translateY(-20px) translateZ(0px) translateX(0) rotate(0deg);opacity:0}
+  10%{opacity:0.9}
+  100%{transform:translateY(105vh) translateZ(-40px) translateX(50px) rotate(540deg);opacity:0}
+`;
 
+// ── Aurora ───────────────────────────────────────────────────────────────────
 const Aurora = styled.div`
   position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;
   opacity:0;transition:opacity 1.5s ease;
-  ${p=>p.$active && css`opacity:1;`}
+  ${p => p.$active && css`opacity:1;`}
 `;
 const AuroraLayer = styled.div`
   position:absolute;width:180%;height:60%;top:${p=>p.$top}%;left:-40%;
@@ -28,6 +48,7 @@ const AuroraLayer = styled.div`
   animation-delay:${p=>p.$delay}s;
 `;
 
+// ── Card ─────────────────────────────────────────────────────────────────────
 const Card = styled.div`
   background:rgba(10,16,30,0.72);border-radius:20px;
   border:1px solid rgba(255,255,255,0.07);backdrop-filter:blur(32px);overflow:hidden;
@@ -36,9 +57,9 @@ const Card = styled.div`
   width:100%;
 `;
 
+// ── Top bar ──────────────────────────────────────────────────────────────────
 const TopBar = styled.div`
-  display:flex;flex-direction:column;gap:12px;
-  padding:1.5rem 1.25rem 0;
+  display:flex;flex-direction:column;gap:12px;padding:1.5rem 1.25rem 0;
   @media(min-width:480px){flex-direction:row;justify-content:space-between;align-items:flex-start;padding:2rem 2rem 0;}
 `;
 const CityName = styled.h2`
@@ -50,19 +71,26 @@ const CountryDate = styled.div`
   margin-top:6px;
   span{display:block;font-size:0.82rem;color:var(--text-muted);}
 `;
-const UnitToggle = styled.div`
+
+// ── 3D flip unit toggle ───────────────────────────────────────────────────────
+const UnitToggleWrap = styled.div`
   display:flex;align-items:center;align-self:flex-start;
   background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
   border-radius:10px;padding:3px;flex-shrink:0;
+  perspective:400px;
 `;
 const UnitBtn = styled.button`
   background:${p=>p.$active?'rgba(56,189,248,0.2)':'transparent'};
   color:${p=>p.$active?'var(--primary)':'var(--text-muted)'};
   border:none;padding:6px 12px;border-radius:8px;cursor:pointer;
   font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:500;
-  transition:all 0.25s ease;&:hover{color:var(--primary);}
+  transition:all 0.25s ease;
+  transform-style:preserve-3d;
+  ${p=>p.$active && css`animation:${flipIn} 0.4s var(--ease) both;`}
+  &:hover{color:var(--primary);}
 `;
 
+// ── Hero ─────────────────────────────────────────────────────────────────────
 const HeroSection = styled.div`
   display:flex;align-items:center;justify-content:space-between;
   padding:1rem 1.25rem 0.75rem;
@@ -85,10 +113,46 @@ const Description = styled.p`
   text-transform:capitalize;font-weight:400;margin-top:4px;letter-spacing:0.02em;
   ${p=>p.$night && css`animation:${neonPulse} 4s ease-in-out infinite;animation-delay:0.5s;`}
 `;
-const WeatherIconWrap = styled.div`
-  font-size:clamp(3rem,10vw,5rem);color:var(--primary);opacity:0.9;flex-shrink:0;margin-left:1rem;
-  filter:drop-shadow(0 0 20px var(--primary-glow));animation:float 6s ease-in-out infinite;
+
+// ── 3D spinning weather icon ──────────────────────────────────────────────────
+const IconScene = styled.div`
+  width:clamp(80px,18vw,120px);height:clamp(80px,18vw,120px);
+  flex-shrink:0;margin-left:1rem;
+  perspective:400px;
+  display:flex;align-items:center;justify-content:center;
 `;
+const IconInner = styled.div`
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  transform-style:preserve-3d;
+  animation:${p => {
+    if (p.$type === 'sun') return css`${iconSpin} 12s linear infinite`;
+    if (p.$type === 'moon') return css`${iconFloat} 4s ease-in-out infinite`;
+    if (p.$type === 'snow') return css`${iconSpin} 8s linear infinite`;
+    if (p.$type === 'bolt') return css`${iconPulse} 1.5s ease-in-out infinite`;
+    return css`${iconFloat} 5s ease-in-out infinite`;
+  }};
+  font-size:clamp(3rem,10vw,5rem);
+  color:var(--primary);
+  filter:drop-shadow(0 0 20px var(--primary-glow)) drop-shadow(0 0 40px var(--primary-glow));
+  ${p => p.$type === 'sun' && css`color:#fbbf24;filter:drop-shadow(0 0 20px rgba(251,191,36,0.6)) drop-shadow(0 0 50px rgba(251,191,36,0.3));`}
+  ${p => p.$type === 'bolt' && css`color:#a78bfa;filter:drop-shadow(0 0 20px rgba(167,139,250,0.8));`}
+`;
+const iconTypeMap = {
+  '01d':'sun','01n':'moon','02d':'cloud','02n':'cloud',
+  '03d':'cloud','03n':'cloud','04d':'cloud','04n':'cloud',
+  '09d':'rain','09n':'rain','10d':'rain','10n':'rain',
+  '11d':'bolt','11n':'bolt','13d':'snow','13n':'snow',
+  '50d':'mist','50n':'mist',
+};
+const iconMap = {
+  '01d':'sun','01n':'moon','02d':'cloud-sun','02n':'cloud-moon',
+  '03d':'cloud','03n':'cloud','04d':'cloud','04n':'cloud',
+  '09d':'cloud-showers-heavy','09n':'cloud-showers-heavy',
+  '10d':'cloud-sun-rain','10n':'cloud-moon-rain',
+  '11d':'bolt','11n':'bolt','13d':'snowflake','13n':'snowflake',
+  '50d':'smog','50n':'smog',
+};
 
 const Divider = styled.div`
   height:1px;margin:0 1.25rem;
@@ -96,8 +160,8 @@ const Divider = styled.div`
   @media(min-width:480px){margin:0 2rem;}
 `;
 
-/* FEELS BAR */
-const FeelsSection = styled.div`padding:1.1rem 1.25rem;@media(min-width:480px){padding:1.25rem 2rem;}`;
+// ── Feels bar ─────────────────────────────────────────────────────────────────
+const FeelsSection= styled.div`padding:1.1rem 1.25rem;@media(min-width:480px){padding:1.25rem 2rem;}`;
 const FeelsRow    = styled.div`display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:4px;`;
 const FeelsLabel  = styled.span`font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;`;
 const FeelsVals   = styled.span`font-size:0.78rem;color:var(--text-muted);font-family:'DM Mono',monospace;`;
@@ -114,7 +178,7 @@ const BarMarker = styled.div`
   left:${p=>p.$pct}%;transform:translateX(-50%);box-shadow:0 0 8px ${p=>p.$color};
 `;
 const BarLegend = styled.div`display:flex;justify-content:space-between;margin-top:8px;`;
-const LegendItem = styled.div`
+const LegendItem= styled.div`
   display:flex;align-items:center;gap:5px;
   span:first-child{width:8px;height:8px;border-radius:50%;background:${p=>p.$color};display:inline-block;}
   span:last-child{font-size:0.68rem;color:var(--text-muted);}
@@ -144,38 +208,39 @@ function FeelsBar({ actual, feels, unit }) {
   );
 }
 
-/* INFO GRID — staggered entrance */
+// ── Info grid ─────────────────────────────────────────────────────────────────
 const InfoGrid = styled.div`
-  display:grid;grid-template-columns:repeat(2,1fr);gap:0;
+  display:grid;grid-template-columns:repeat(2,1fr);
   padding:1.25rem 1.25rem;
   @media(min-width:480px){grid-template-columns:repeat(4,1fr);padding:1.5rem 2rem;}
 `;
 const InfoItem = styled.div`
   display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;
-  padding:0.75rem 0.5rem;position:relative;cursor:default;
-  opacity:0;
-  animation:${stagger} 0.4s var(--ease) forwards;
+  padding:0.75rem 0.5rem;position:relative;border-radius:10px;cursor:default;
+  opacity:0;animation:${stagger} 0.4s var(--ease) forwards;
   animation-delay:${p=>p.$i*0.08+0.4}s;
-  transition:background 0.2s ease;
-  border-radius:10px;
-  &:hover{background:rgba(56,189,248,0.05);}
+  transition:background 0.2s ease;&:hover{background:rgba(56,189,248,0.05);}
   &:nth-child(odd):not(:last-child){@media(max-width:479px){border-right:1px solid rgba(255,255,255,0.06);}}
   &:nth-child(-n+2){@media(max-width:479px){border-bottom:1px solid rgba(255,255,255,0.06);}}
   @media(min-width:480px){
-    &:not(:last-child)::after{content:'';position:absolute;right:0;top:20%;height:60%;width:1px;background:rgba(255,255,255,0.06);}
+    &:not(:last-child)::after{content:'';position:absolute;right:0;top:20%;height:60%;
+    width:1px;background:rgba(255,255,255,0.06);}
   }
 `;
 const InfoIcon  = styled.i`font-size:1.1rem;color:var(--primary);opacity:0.8;`;
 const InfoLabel = styled.span`font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;`;
 const InfoValue = styled.span`font-size:0.95rem;color:var(--text);font-weight:500;font-family:'DM Mono',monospace;`;
 
-/* COMPASS */
+// ── Compass ───────────────────────────────────────────────────────────────────
 const CompassWrap   = styled.div`position:relative;width:50px;height:50px;`;
-const CompassRing   = styled.svg`position:absolute;inset:0;width:100%;height:100%;animation:${compassSpin} 8s linear infinite;animation-play-state:${p=>p.$spinning?'running':'paused'};`;
+const CompassRing   = styled.svg`position:absolute;inset:0;width:100%;height:100%;
+  animation:${compassSpin} 8s linear infinite;
+  animation-play-state:${p=>p.$spinning?'running':'paused'};`;
 const CompassNeedle = styled.div`
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   transform:rotate(${p=>p.$deg}deg);transition:transform 1.2s cubic-bezier(0.34,1.56,0.64,1);
-  &::before{content:'';width:3px;height:20px;border-radius:2px;background:linear-gradient(180deg,#f87171 50%,rgba(56,189,248,0.6) 50%);}
+  &::before{content:'';width:3px;height:20px;border-radius:2px;
+  background:linear-gradient(180deg,#f87171 50%,rgba(56,189,248,0.6) 50%);}
 `;
 const CompassLabel = styled.span`
   position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);
@@ -201,7 +266,56 @@ function Compass({ deg }) {
   );
 }
 
-/* SECTION HEAD */
+// ── UV Ring gauge ─────────────────────────────────────────────────────────────
+const uvColors = ['#34d399','#34d399','#34d399','#fbbf24','#fbbf24','#fbbf24','#fb923c','#fb923c','#f87171','#f87171','#a78bfa','#a78bfa'];
+const uvLabels = ['Low','Low','Low','Moderate','Moderate','Moderate','High','High','Very High','Very High','Extreme','Extreme'];
+function UVGauge({ uv = 0 }) {
+  const clamped = Math.min(uv, 11);
+  const R = 22, circ = 2 * Math.PI * R;
+  const pct = clamped / 11;
+  const offset = circ * (1 - pct);
+  const color = uvColors[Math.round(clamped)] || '#34d399';
+  const label = uvLabels[Math.round(clamped)] || 'Low';
+  return (
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
+      <svg width="54" height="54" viewBox="0 0 54 54">
+        <circle cx="27" cy="27" r={R} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5"/>
+        <circle cx="27" cy="27" r={R} fill="none" stroke={color} strokeWidth="5"
+          strokeLinecap="round" strokeDasharray={circ}
+          strokeDashoffset={offset}
+          style={{transformOrigin:'center',transform:'rotate(-90deg)',transition:'stroke-dashoffset 1s ease'}}/>
+        <text x="27" y="27" textAnchor="middle" dominantBaseline="central"
+          fill="white" fontSize="11" fontFamily="DM Mono" fontWeight="500">{clamped}</text>
+      </svg>
+      <InfoLabel>UV {label}</InfoLabel>
+    </div>
+  );
+}
+
+// ── Air quality ───────────────────────────────────────────────────────────────
+const aqiLabels = ['','Good','Fair','Moderate','Poor','Very Poor'];
+const aqiColors = ['','#34d399','#a3e635','#fbbf24','#fb923c','#f87171'];
+function AirBadge({ aqi }) {
+  if (!aqi) return <><InfoIcon className="fas fa-wind"/><InfoLabel>Air</InfoLabel><InfoValue>N/A</InfoValue></>;
+  const color = aqiColors[aqi] || '#34d399';
+  const label = aqiLabels[aqi] || 'Good';
+  return (
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:6}}>
+      <div style={{
+        width:36,height:36,borderRadius:'50%',
+        background:`radial-gradient(circle, ${color}33, ${color}11)`,
+        border:`2px solid ${color}66`,
+        display:'flex',alignItems:'center',justifyContent:'center',
+        boxShadow:`0 0 12px ${color}44`,
+      }}>
+        <i className="fas fa-leaf" style={{color,fontSize:'0.9rem'}}/>
+      </div>
+      <InfoLabel>AQI {label}</InfoLabel>
+    </div>
+  );
+}
+
+// ── Section head ──────────────────────────────────────────────────────────────
 const SectionHead = styled.div`
   padding:1rem 1.25rem 0.75rem;display:flex;align-items:center;gap:10px;
   @media(min-width:480px){padding:1rem 2rem 0.75rem;}
@@ -209,7 +323,7 @@ const SectionHead = styled.div`
   &::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,0.06),transparent);}
 `;
 
-/* HOURLY CHART — real data from forecast */
+// ── Hourly chart ──────────────────────────────────────────────────────────────
 const ChartWrap = styled.div`
   padding:0 1.25rem 1.5rem;overflow-x:auto;
   scrollbar-width:none;&::-webkit-scrollbar{display:none;}
@@ -217,13 +331,10 @@ const ChartWrap = styled.div`
 `;
 function HourlyChart({ forecast, units }) {
   const u = units==='metric'?'°C':'°F';
-  const points = forecast.slice(0,6).map((d,i)=>({
-    label: `Day ${i+1}`,
-    temp: d.temperature,
-  }));
+  const points = forecast.slice(0,6).map((d,i)=>({ label:`Day ${i+1}`, temp:d.temperature }));
   const temps=points.map(p=>p.temp);
   const min=Math.min(...temps)-2, max=Math.max(...temps)+2;
-  const W=580, H=90, pad=28;
+  const W=580,H=90,pad=28;
   const xStep=(W-pad*2)/(points.length-1);
   const yScale=t=>H-((t-min)/(max-min))*(H-20)-10;
   const smooth=points.map((p,i,arr)=>{
@@ -258,7 +369,7 @@ function HourlyChart({ forecast, units }) {
   );
 }
 
-/* FORECAST with tilt */
+// ── Forecast tilt cards ───────────────────────────────────────────────────────
 const ForecastScroll = styled.div`
   display:flex;overflow-x:auto;gap:8px;padding:0 1.25rem 1.5rem;
   scrollbar-width:none;&::-webkit-scrollbar{display:none;}
@@ -267,7 +378,7 @@ const ForecastScroll = styled.div`
 const ForecastCard = styled.div`
   min-width:80px;flex-shrink:0;padding:0.85rem 0.6rem;text-align:center;
   background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;
-  transition:transform 0.15s ease,box-shadow 0.15s ease,background 0.15s ease,border-color 0.15s ease;
+  transition:background 0.15s ease,border-color 0.15s ease;
   transform-style:preserve-3d;will-change:transform;
   opacity:0;animation:${stagger} 0.4s var(--ease) forwards;
   animation-delay:${p=>p.$i*0.06+0.6}s;
@@ -277,7 +388,6 @@ const ForecastCard = styled.div`
 const ForecastDay  = styled.div`font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;`;
 const ForecastIcon = styled.div`font-size:1.35rem;color:var(--primary);margin:5px 0;`;
 const ForecastTemp = styled.div`font-size:0.9rem;color:var(--text);font-weight:500;font-family:'DM Mono',monospace;`;
-
 function TiltCard({ children, index }) {
   const ref=useRef(null);
   const onMove=e=>{
@@ -287,11 +397,11 @@ function TiltCard({ children, index }) {
     el.style.transform=`perspective(600px) rotateY(${x*18}deg) rotateX(${-y*18}deg) scale(1.04)`;
     el.style.boxShadow=`${-x*12}px ${-y*12}px 24px rgba(56,189,248,0.12)`;
   };
-  const onLeave=()=>{const el=ref.current; if(!el) return; el.style.transform=''; el.style.boxShadow='';};
+  const onLeave=()=>{const el=ref.current;if(!el)return;el.style.transform='';el.style.boxShadow='';};
   return <ForecastCard ref={ref} $i={index} onMouseMove={onMove} onMouseLeave={onLeave}>{children}</ForecastCard>;
 }
 
-/* SUN ARC */
+// ── Sun arc ───────────────────────────────────────────────────────────────────
 const SunArcWrap = styled.div`padding:0.75rem 1.25rem 1.75rem;@media(min-width:480px){padding:0.75rem 2rem 2rem;}`;
 const SunRow     = styled.div`display:flex;justify-content:center;align-items:flex-end;gap:2rem;@media(min-width:480px){gap:3rem;}`;
 const SunItem    = styled.div`
@@ -302,16 +412,15 @@ const SunItem    = styled.div`
   span:last-child{font-size:0.9rem;color:var(--text);font-weight:500;font-family:'DM Mono',monospace;}
 `;
 const SunSep = styled.div`width:1px;height:30px;background:rgba(255,255,255,0.07);`;
-
 function SunArc({ sunrise, sunset }) {
-  const toMins = t => { const [h,m]=t.split(':').map(Number); return h*60+m; };
-  const now = new Date(); const nowMins = now.getHours()*60+now.getMinutes();
-  const rMins=toMins(sunrise), sMins=toMins(sunset), total=sMins-rMins||1;
+  const toMins=t=>{const[h,m]=t.split(':').map(Number);return h*60+m;};
+  const now=new Date(); const nowMins=now.getHours()*60+now.getMinutes();
+  const rMins=toMins(sunrise),sMins=toMins(sunset),total=sMins-rMins||1;
   const pct=Math.min(Math.max((nowMins-rMins)/total,0),1);
-  const cx=120, cy=90, r=70;
-  const startX=cx-r, endX=cx+r, midY=cy;
+  const cx=120,cy=90,r=70;
+  const startX=cx-r,endX=cx+r;
   const sunAngle=Math.PI*(1-pct);
-  const sunX=cx+r*Math.cos(sunAngle), sunY=cy-r*Math.sin(sunAngle);
+  const sunX=cx+r*Math.cos(sunAngle),sunY=cy-r*Math.sin(sunAngle);
   return (
     <SunArcWrap>
       <svg viewBox="0 0 240 100" style={{width:'100%',maxWidth:300,display:'block',margin:'0 auto 12px'}}>
@@ -322,20 +431,15 @@ function SunArc({ sunrise, sunset }) {
             <stop offset="100%" stopColor="rgba(251,191,36,0.15)"/>
           </linearGradient>
         </defs>
-        {/* Track */}
-        <path d={`M ${startX} ${midY} A ${r} ${r} 0 0 1 ${endX} ${midY}`}
+        <path d={`M ${startX} ${cy} A ${r} ${r} 0 0 1 ${endX} ${cy}`}
           fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2" strokeDasharray="4 4"/>
-        {/* Progress arc */}
-        <path d={`M ${startX} ${midY} A ${r} ${r} 0 0 1 ${sunX} ${sunY}`}
+        <path d={`M ${startX} ${cy} A ${r} ${r} 0 0 1 ${sunX} ${sunY}`}
           fill="none" stroke="url(#arcGrad)" strokeWidth="2.5" strokeLinecap="round"/>
-        {/* Horizon line */}
-        <line x1={startX-8} y1={midY} x2={endX+8} y2={midY} stroke="rgba(255,255,255,0.07)" strokeWidth="1"/>
-        {/* Sun dot */}
+        <line x1={startX-8} y1={cy} x2={endX+8} y2={cy} stroke="rgba(255,255,255,0.07)" strokeWidth="1"/>
         <circle cx={sunX} cy={sunY} r="6" fill="var(--gold)" opacity="0.9"/>
         <circle cx={sunX} cy={sunY} r="10" fill="rgba(251,191,36,0.2)"/>
-        {/* Labels */}
-        <text x={startX} y={midY+14} textAnchor="middle" fill="rgba(100,116,139,0.8)" fontSize="7" fontFamily="DM Mono">{sunrise}</text>
-        <text x={endX}   y={midY+14} textAnchor="middle" fill="rgba(100,116,139,0.8)" fontSize="7" fontFamily="DM Mono">{sunset}</text>
+        <text x={startX} y={cy+14} textAnchor="middle" fill="rgba(100,116,139,0.8)" fontSize="7" fontFamily="DM Mono">{sunrise}</text>
+        <text x={endX}   y={cy+14} textAnchor="middle" fill="rgba(100,116,139,0.8)" fontSize="7" fontFamily="DM Mono">{sunset}</text>
       </svg>
       <SunRow>
         <SunItem>
@@ -352,26 +456,22 @@ function SunArc({ sunrise, sunset }) {
   );
 }
 
-const iconMap={
-  '01d':'sun','01n':'moon','02d':'cloud-sun','02n':'cloud-moon',
-  '03d':'cloud','03n':'cloud','04d':'cloud','04n':'cloud',
-  '09d':'cloud-showers-heavy','09n':'cloud-showers-heavy',
-  '10d':'cloud-sun-rain','10n':'cloud-moon-rain',
-  '11d':'bolt','11n':'bolt','13d':'snowflake','13n':'snowflake',
-  '50d':'smog','50n':'smog',
-};
-const nightSet=new Set(['01n','02n','03n','04n','09n','10n','11n','13n','50n']);
-const coldSet =new Set(['13d','13n','01n','02n']);
+// ── Sets ──────────────────────────────────────────────────────────────────────
+const nightSet = new Set(['01n','02n','03n','04n','09n','10n','11n','13n','50n']);
+const coldSet  = new Set(['13d','13n','01n','02n']);
 
+// ── Main component ────────────────────────────────────────────────────────────
 export default function WeatherCard({ data, units, onUnitsChange }) {
-  const ico=ic=>iconMap[ic]||'cloud';
-  const u=units==='metric'?'°C':'°F';
-  const ws=units==='metric'?'m/s':'mph';
-  const isNight=nightSet.has(data.icon);
-  const showAurora=coldSet.has(data.icon);
+  const ico      = ic => iconMap[ic] || 'cloud';
+  const icoType  = ic => iconTypeMap[ic] || 'cloud';
+  const u        = units === 'metric' ? '°C' : '°F';
+  const ws       = units === 'metric' ? 'm/s' : 'mph';
+  const isNight  = nightSet.has(data.icon);
+  const showAurora = coldSet.has(data.icon);
 
   return (
     <>
+      {/* Aurora for night/snow/cold */}
       <Aurora $active={showAurora}>
         <AuroraLayer $top={-10} $color="linear-gradient(180deg,rgba(52,211,153,0.18),transparent)" $dur={9}  $delay={0}/>
         <AuroraLayer $top={5}   $color="linear-gradient(180deg,rgba(129,140,248,0.14),transparent)" $dur={13} $delay={-4}/>
@@ -379,6 +479,7 @@ export default function WeatherCard({ data, units, onUnitsChange }) {
       </Aurora>
 
       <Card>
+        {/* Top bar */}
         <TopBar>
           <div>
             <CityName $night={isNight}>{data.city}</CityName>
@@ -387,24 +488,32 @@ export default function WeatherCard({ data, units, onUnitsChange }) {
               <span>{formatDate(data.date)}</span>
             </CountryDate>
           </div>
-          <UnitToggle>
+          {/* 3D flip unit toggle */}
+          <UnitToggleWrap>
             <UnitBtn $active={units==='metric'}   onClick={()=>onUnitsChange('metric')}>°C</UnitBtn>
             <UnitBtn $active={units==='imperial'} onClick={()=>onUnitsChange('imperial')}>°F</UnitBtn>
-          </UnitToggle>
+          </UnitToggleWrap>
         </TopBar>
 
+        {/* Hero — slot temp + 3D spinning icon */}
         <HeroSection>
           <TempBlock>
             <SlotTemp value={data.temperature} unit={u}/>
             <Description $night={isNight}>{data.description}</Description>
           </TempBlock>
-          <WeatherIconWrap><i className={`fas fa-${ico(data.icon)}`}/></WeatherIconWrap>
+          <IconScene>
+            <IconInner $type={icoType(data.icon)}>
+              <i className={`fas fa-${ico(data.icon)}`}/>
+            </IconInner>
+          </IconScene>
         </HeroSection>
 
         <Divider/>
+        {/* Feels-like comparison bar */}
         <FeelsBar actual={data.temperature} feels={data.feelsLike} unit={u}/>
         <Divider/>
 
+        {/* Info grid — compass + humidity + pressure + visibility */}
         <InfoGrid>
           {[
             { i:0, content:<><div style={{marginBottom:20}}><Compass deg={data.windDeg??0}/></div><InfoLabel>Wind {data.windSpeed} {ws}</InfoLabel></> },
@@ -415,10 +524,31 @@ export default function WeatherCard({ data, units, onUnitsChange }) {
         </InfoGrid>
 
         <Divider/>
+
+        {/* UV + Air quality row */}
+        <SectionHead><h3>Environment</h3></SectionHead>
+        <InfoGrid style={{paddingTop:'0.5rem',paddingBottom:'1.25rem'}}>
+          <InfoItem $i={0}><UVGauge uv={data.uvIndex}/></InfoItem>
+          <InfoItem $i={1}><AirBadge aqi={data.airQuality?.aqi}/></InfoItem>
+          <InfoItem $i={2}>
+            <InfoIcon className="fas fa-smog"/>
+            <InfoLabel>PM2.5</InfoLabel>
+            <InfoValue>{data.airQuality?.pm25 ? `${data.airQuality.pm25.toFixed(1)}` : 'N/A'}</InfoValue>
+          </InfoItem>
+          <InfoItem $i={3}>
+            <InfoIcon className="fas fa-cloud"/>
+            <InfoLabel>PM10</InfoLabel>
+            <InfoValue>{data.airQuality?.pm10 ? `${data.airQuality.pm10.toFixed(1)}` : 'N/A'}</InfoValue>
+          </InfoItem>
+        </InfoGrid>
+
+        <Divider/>
+        {/* Hourly trend chart */}
         <SectionHead><h3>Forecast Trend</h3></SectionHead>
         <HourlyChart forecast={data.forecast} units={units}/>
 
         <Divider/>
+        {/* 5-day forecast tilt cards */}
         <SectionHead><h3>5-Day Forecast</h3></SectionHead>
         <ForecastScroll>
           {data.forecast.map((day,i)=>(
@@ -431,6 +561,7 @@ export default function WeatherCard({ data, units, onUnitsChange }) {
         </ForecastScroll>
 
         <Divider/>
+        {/* Sun arc */}
         <SectionHead><h3>Sun Cycle</h3></SectionHead>
         <SunArc sunrise={data.sunrise} sunset={data.sunset}/>
       </Card>
