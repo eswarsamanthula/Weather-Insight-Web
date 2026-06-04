@@ -40,7 +40,7 @@ const GhostCity = styled.div`
   font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(3rem, 18vw, 16rem);
   letter-spacing: 0.08em;
-  color: rgba(56, 189, 248, 0.07);
+  color: rgba(56, 189, 248, 0.04);
   white-space: nowrap;
   pointer-events: none;
   z-index: 1;
@@ -78,7 +78,7 @@ const SkeletonCard = styled.div`
 const SkeletonLine = styled.div`
   height: ${p => p.$h || '14px'};
   width: ${p => p.$w || '100%'};
-  background: rgba(56,189,248,0.08);
+  background: rgba(56,189,248,0.18);
   border-radius: 6px;
   margin-bottom: ${p => p.$mb || '12px'};
 `;

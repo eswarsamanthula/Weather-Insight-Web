@@ -85,7 +85,8 @@ const UnitBtn = styled.button`
   border:none;padding:6px 12px;border-radius:8px;cursor:pointer;
   font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:500;
   transition:all 0.25s ease;
-  &.flip{animation:${flipIn} 0.35s var(--ease) both;}
+  transform-style:preserve-3d;
+  ${p=>p.$active && css`animation:${flipIn} 0.4s var(--ease) both;`}
   &:hover{color:var(--primary);}
 `;
 
@@ -369,6 +370,18 @@ function HourlyChart({ forecast, units }) {
 }
 
 // ── Forecast tilt cards ───────────────────────────────────────────────────────
+const ForecastWrap = styled.div`
+  position:relative;
+  &::after {
+    content:'';
+    position:absolute; top:0; right:0; bottom:1.5rem;
+    width:48px;
+    background:linear-gradient(90deg,transparent,rgba(10,16,30,0.85));
+    pointer-events:none;
+    border-radius:0 0 8px 0;
+    @media(min-width:480px){display:none;}
+  }
+`;
 const ForecastScroll = styled.div`
   display:flex;overflow-x:auto;gap:8px;padding:0 1.25rem 1.5rem;
   scrollbar-width:none;&::-webkit-scrollbar{display:none;}
@@ -461,8 +474,6 @@ const coldSet  = new Set(['13d','13n','01n','02n']);
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function WeatherCard({ data, units, onUnitsChange }) {
-  const [flipped, setFlipped] = useState(null);
-  const handleUnit = (u) => { setFlipped(u); onUnitsChange(u); };
   const ico      = ic => iconMap[ic] || 'cloud';
   const icoType  = ic => iconTypeMap[ic] || 'cloud';
   const u        = units === 'metric' ? '°C' : '°F';
@@ -491,8 +502,8 @@ export default function WeatherCard({ data, units, onUnitsChange }) {
           </div>
           {/* 3D flip unit toggle */}
           <UnitToggleWrap>
-            <UnitBtn $active={units==='metric'}   className={flipped==='metric'?'flip':''} onClick={()=>handleUnit('metric')}>°C</UnitBtn>
-            <UnitBtn $active={units==='imperial'} className={flipped==='imperial'?'flip':''} onClick={()=>handleUnit('imperial')}>°F</UnitBtn>
+            <UnitBtn $active={units==='metric'}   onClick={()=>onUnitsChange('metric')}>°C</UnitBtn>
+            <UnitBtn $active={units==='imperial'} onClick={()=>onUnitsChange('imperial')}>°F</UnitBtn>
           </UnitToggleWrap>
         </TopBar>
 
@@ -551,7 +562,7 @@ export default function WeatherCard({ data, units, onUnitsChange }) {
         <Divider/>
         {/* 5-day forecast tilt cards */}
         <SectionHead><h3>5-Day Forecast</h3></SectionHead>
-        <ForecastScroll>
+        <ForecastWrap><ForecastScroll>
           {data.forecast.map((day,i)=>(
             <TiltCard key={i} index={i}>
               <ForecastDay>{formatDate(day.date,'short')}</ForecastDay>
@@ -559,7 +570,7 @@ export default function WeatherCard({ data, units, onUnitsChange }) {
               <ForecastTemp>{Math.round(day.temperature)}{u}</ForecastTemp>
             </TiltCard>
           ))}
-        </ForecastScroll>
+        </ForecastScroll></ForecastWrap>
 
         <Divider/>
         {/* Sun arc */}
