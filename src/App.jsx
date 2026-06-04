@@ -40,7 +40,7 @@ const GhostCity = styled.div`
   font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(3rem, 18vw, 16rem);
   letter-spacing: 0.08em;
-  color: rgba(56, 189, 248, 0.04);
+  color: rgba(56, 189, 248, 0.07);
   white-space: nowrap;
   pointer-events: none;
   z-index: 1;
