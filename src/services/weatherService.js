@@ -5,9 +5,11 @@ const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 export async function fetchWeatherData(city, units = 'metric') {
   try {
+    // Normalize unicode chars so cities like Duggirāla work
+    const q = city.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const [response, forecastResponse] = await Promise.all([
-      axios.get(`${BASE_URL}/weather`, { params: { q: city, units, appid: API_KEY } }),
-      axios.get(`${BASE_URL}/forecast`, { params: { q: city, units, appid: API_KEY } }),
+      axios.get(`${BASE_URL}/weather`, { params: { q, units, appid: API_KEY } }),
+      axios.get(`${BASE_URL}/forecast`, { params: { q, units, appid: API_KEY } }),
     ]);
     const coords = response.data.coord;
     const airData = await fetchAirQuality(coords.lat, coords.lon);
@@ -44,9 +46,18 @@ async function fetchAirQuality(lat, lon) {
 }
 
 function processWeatherData(currentData, forecastData, airData) {
-  const sunrise = new Date(currentData.sys.sunrise * 1000);
-  const sunset  = new Date(currentData.sys.sunset  * 1000);
-  const fmt = d => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  // Use city timezone offset from API (seconds from UTC)
+  const tzOffset = currentData.timezone ?? 0;
+  const fmtUtc = (unixTs) => {
+    const totalMins = Math.floor((unixTs + tzOffset) / 60);
+    const h = Math.floor(totalMins / 60) % 24;
+    const m = totalMins % 60;
+    const hh = String(h).padStart(2, '0');
+    const mm = String(m).padStart(2, '0');
+    return `${hh}:${mm}`;
+  };
+  const sunrise = fmtUtc(currentData.sys.sunrise);
+  const sunset  = fmtUtc(currentData.sys.sunset);
 
   // UV index approx from clouds + time (free tier has no UV endpoint)
   const clouds = currentData.clouds?.all ?? 0;
@@ -66,8 +77,8 @@ function processWeatherData(currentData, forecastData, airData) {
     visibility:  currentData.visibility,
     description: currentData.weather[0].description,
     icon:        currentData.weather[0].icon,
-    sunrise:     fmt(sunrise),
-    sunset:      fmt(sunset),
+    sunrise:     sunrise,
+    sunset:      sunset,
     uvIndex:     uvApprox,
     airQuality:  airData,
     lat:         currentData.coord.lat,
