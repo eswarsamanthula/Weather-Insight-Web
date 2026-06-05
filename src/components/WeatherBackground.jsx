@@ -39,10 +39,13 @@ const typeMap = {
 };
 
 export default function WeatherBackground({ weatherData }) {
+  const temp = weatherData?.temperature ?? 20;
+  const icon = weatherData?.icon ?? '01d';
+  const type = typeMap[icon] || 'sunny';
+  const isNightType = type === 'night' || type.includes('night') || (type.includes('rain') && icon.endsWith('n')) || icon.endsWith('n');
+  const isRaining = ['rain','heavy-rain','storm'].includes(type);
   const ref = useRef(null);
   const parallaxRef = useRef(null);
-  const icon = weatherData?.icon || 'default';
-  const type = typeMap[icon] || 'sunny';
 
   // Parallax mouse handler
   useEffect(() => {
@@ -66,43 +69,67 @@ export default function WeatherBackground({ weatherData }) {
     if (!c) return;
     c.innerHTML = '';
 
-    // ── SUNNY ──────────────────────────────────────────────
-    if (type === 'sunny') {
-      // Big sun disc
+    // ── SUN (day, non-raining) — intensity based on temperature ──
+    if (!isNightType && !isRaining) {
+      // temp <10 = dim, 10-25 = medium, 25-35 = bright, 35+ = intense
+      const t = Math.min(Math.max(temp, -5), 45);
+      const intensity = (t + 5) / 50; // 0 to 1
+      const coreOpacity  = 0.08 + intensity * 0.22;  // 0.08 – 0.30
+      const hazeOpacity  = 0.04 + intensity * 0.12;  // 0.04 – 0.16
+      const glowSize     = 300 + intensity * 280;     // 300 – 580px
+      const heatColor    = temp > 35
+        ? `rgba(255,120,30,${coreOpacity})`           // orange-red for extreme heat
+        : temp > 25
+          ? `rgba(255,180,40,${coreOpacity})`         // warm golden
+          : `rgba(255,210,80,${coreOpacity})`;        // pale yellow for cool
+
+      // Sun disc — top LEFT
       const sun = document.createElement('div');
-      sun.style.cssText = `position:absolute;top:-120px;left:-120px;width:500px;height:500px;
-        background:radial-gradient(circle, rgba(255,200,60,0.18) 0%, rgba(255,150,30,0.08) 40%, transparent 70%);
+      sun.style.cssText = `position:absolute;top:-100px;left:-100px;width:${glowSize}px;height:${glowSize}px;
+        background:radial-gradient(circle, ${heatColor} 0%, rgba(255,150,30,${hazeOpacity}) 45%, transparent 72%);
         border-radius:50%;animation:float 10s ease-in-out infinite;`;
       c.appendChild(sun);
-      // Haze ring
-      const haze = document.createElement('div');
-      haze.style.cssText = `position:absolute;top:-60px;left:-60px;width:380px;height:380px;
-        background:radial-gradient(circle,rgba(255,220,80,0.07) 0%,transparent 65%);
-        border-radius:50%;animation:float 14s ease-in-out infinite reverse;`;
-      c.appendChild(haze);
+      // Inner bright core
+      const core = document.createElement('div');
+      const coreSize = 80 + intensity * 120;
+      core.style.cssText = `position:absolute;top:${-coreSize*0.6}px;left:${-coreSize*0.6}px;
+        width:${coreSize}px;height:${coreSize}px;
+        background:radial-gradient(circle, rgba(255,240,180,${0.15 + intensity*0.25}) 0%, transparent 70%);
+        border-radius:50%;animation:float 8s ease-in-out infinite;`;
+      c.appendChild(core);
+      // Heat haze (only above 30°)
+      if (temp > 30) {
+        const heat = document.createElement('div');
+        heat.style.cssText = `position:absolute;bottom:0;left:0;right:0;height:20%;
+          background:linear-gradient(0deg,rgba(255,150,30,${(temp-30)/60}),transparent);
+          filter:blur(12px);`;
+        c.appendChild(heat);
+      }
       // Horizon glow
       const hor = document.createElement('div');
       hor.style.cssText = `position:absolute;bottom:0;left:0;right:0;height:35%;
-        background:linear-gradient(0deg,rgba(30,100,180,0.12),transparent);`;
+        background:linear-gradient(0deg,rgba(30,100,180,0.10),transparent);`;
       c.appendChild(hor);
     }
 
-    // ── NIGHT ──────────────────────────────────────────────
-    if (type === 'night' || type === 'partly-night') {
-      // Moon
+    // ── MOON always on RIGHT for all night icons ───────────
+    if (isNightType) {
+      // Moon disc — top RIGHT
       const moon = document.createElement('div');
-      moon.style.cssText = `position:absolute;top:40px;right:100px;width:80px;height:80px;
-        background:radial-gradient(circle at 35% 35%, #e2e8f0 0%, #b0bec5 60%, transparent 70%);
-        border-radius:50%;box-shadow:0 0 40px rgba(200,220,255,0.12);`;
+      moon.style.cssText = `position:absolute;top:40px;right:80px;width:88px;height:88px;
+        background:radial-gradient(circle at 35% 35%, #e8edf5 0%, #b8c4d4 55%, transparent 70%);
+        border-radius:50%;
+        box-shadow:0 0 50px rgba(200,220,255,0.15),0 0 20px rgba(180,200,255,0.1);`;
       c.appendChild(moon);
-      // Moon glow
+      // Moon halo glow
       const mg = document.createElement('div');
-      mg.style.cssText = `position:absolute;top:0px;right:60px;width:160px;height:160px;
-        background:radial-gradient(circle,rgba(180,200,255,0.06),transparent 70%);
+      mg.style.cssText = `position:absolute;top:-10px;right:30px;width:190px;height:190px;
+        background:radial-gradient(circle,rgba(180,200,255,0.07),transparent 68%);
         border-radius:50%;`;
       c.appendChild(mg);
       // Stars — 3 depth layers for parallax
-      [[180, '0.2'], [80, '0.5'], [40, '0.9']].forEach(([count, depth]) => {
+      // Stars — only for clear/partly night, not heavy rain/storm
+      if (!['heavy-rain','rain','storm'].includes(type)) [[180, '0.2'], [80, '0.5'], [40, '0.9']].forEach(([count, depth]) => {
         const layer = document.createElement('div');
         layer.dataset.depth = depth;
         layer.style.cssText = `position:absolute;inset:0;transition:transform 0.1s ease;`;

@@ -71,6 +71,15 @@ const CountryDate = styled.div`
   margin-top:6px;
   span{display:block;font-size:0.82rem;color:var(--text-muted);}
 `;
+const LiveTime = styled.span`
+  font-family:'DM Mono',monospace;
+  font-size:0.78rem;
+  color:var(--primary);
+  opacity:0.85;
+  letter-spacing:0.06em;
+  margin-top:2px;
+  display:block;
+`;
 
 // ── 3D flip unit toggle ───────────────────────────────────────────────────────
 const UnitToggleWrap = styled.div`
@@ -370,18 +379,6 @@ function HourlyChart({ forecast, units }) {
 }
 
 // ── Forecast tilt cards ───────────────────────────────────────────────────────
-const ForecastWrap = styled.div`
-  position:relative;
-  &::after {
-    content:'';
-    position:absolute; top:0; right:0; bottom:1.5rem;
-    width:48px;
-    background:linear-gradient(90deg,transparent,rgba(10,16,30,0.85));
-    pointer-events:none;
-    border-radius:0 0 8px 0;
-    @media(min-width:480px){display:none;}
-  }
-`;
 const ForecastScroll = styled.div`
   display:flex;overflow-x:auto;gap:8px;padding:0 1.25rem 1.5rem;
   scrollbar-width:none;&::-webkit-scrollbar{display:none;}
@@ -476,6 +473,24 @@ const coldSet  = new Set(['13d','13n','01n','02n']);
 export default function WeatherCard({ data, units, onUnitsChange }) {
   const ico      = ic => iconMap[ic] || 'cloud';
   const icoType  = ic => iconTypeMap[ic] || 'cloud';
+
+  // Live city local time using API timezone offset
+  const [liveTime, setLiveTime] = useState('');
+  useEffect(() => {
+    const tick = () => {
+      const tzOffset = data.timezone ?? 0; // seconds
+      const utcNow = Date.now() + new Date().getTimezoneOffset() * 60000;
+      const cityMs = utcNow + tzOffset * 1000;
+      const d = new Date(cityMs);
+      const h = String(d.getHours()).padStart(2,'0');
+      const m = String(d.getMinutes()).padStart(2,'0');
+      const s = String(d.getSeconds()).padStart(2,'0');
+      setLiveTime(`${h}:${m}:${s}`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [data.timezone]);
   const u        = units === 'metric' ? '°C' : '°F';
   const ws       = units === 'metric' ? 'm/s' : 'mph';
   const isNight  = nightSet.has(data.icon);
@@ -498,6 +513,7 @@ export default function WeatherCard({ data, units, onUnitsChange }) {
             <CountryDate>
               <span>{data.country}</span>
               <span>{formatDate(data.date)}</span>
+              {liveTime && <LiveTime>⏱ {liveTime} local</LiveTime>}
             </CountryDate>
           </div>
           {/* 3D flip unit toggle */}
@@ -562,7 +578,7 @@ export default function WeatherCard({ data, units, onUnitsChange }) {
         <Divider/>
         {/* 5-day forecast tilt cards */}
         <SectionHead><h3>5-Day Forecast</h3></SectionHead>
-        <ForecastWrap><ForecastScroll>
+        <ForecastScroll>
           {data.forecast.map((day,i)=>(
             <TiltCard key={i} index={i}>
               <ForecastDay>{formatDate(day.date,'short')}</ForecastDay>
@@ -570,7 +586,7 @@ export default function WeatherCard({ data, units, onUnitsChange }) {
               <ForecastTemp>{Math.round(day.temperature)}{u}</ForecastTemp>
             </TiltCard>
           ))}
-        </ForecastScroll></ForecastWrap>
+        </ForecastScroll>
 
         <Divider/>
         {/* Sun arc */}
