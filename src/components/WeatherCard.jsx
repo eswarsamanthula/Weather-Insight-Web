@@ -76,7 +76,7 @@ const LiveTime = styled.span`
   font-size:0.76rem;
   color:var(--primary);
   opacity:0.85;
-  letter-spacing:0.06em;
+  letter-spacing:0.05em;
   margin-top:3px;
   display:block;
 `;
@@ -471,32 +471,33 @@ const coldSet  = new Set(['13d','13n','01n','02n']);
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function WeatherCard({ data, units, onUnitsChange }) {
-  const ico     = ic => iconMap[ic] || 'cloud';
-  const icoType = ic => iconTypeMap[ic] || 'cloud';
+  const ico      = ic => iconMap[ic] || 'cloud';
+  const icoType  = ic => iconTypeMap[ic] || 'cloud';
+  const u        = units === 'metric' ? '°C' : '°F';
+  const ws       = units === 'metric' ? 'm/s' : 'mph';
+  const isNight  = nightSet.has(data.icon);
+  const showAurora = coldSet.has(data.icon);
 
+  // Live city local clock using API timezone offset
   const [liveTime, setLiveTime] = useState('');
   useEffect(() => {
     const tick = () => {
-      const tzOffset = data.timezone ?? 0;
-      const utcNow   = Date.now() + new Date().getTimezoneOffset() * 60000;
-      const cityMs   = utcNow + tzOffset * 1000;
+      const tzOffset = data.timezone ?? 0; // seconds from UTC
+      const utcMs    = Date.now() + new Date().getTimezoneOffset() * 60000;
+      const cityMs   = utcMs + tzOffset * 1000;
       const d        = new Date(cityMs);
       const raw      = d.getHours();
       const ampm     = raw >= 12 ? 'PM' : 'AM';
       const h12      = raw % 12 || 12;
-      const h        = String(h12).padStart(2,'0');
-      const m        = String(d.getMinutes()).padStart(2,'0');
-      const s        = String(d.getSeconds()).padStart(2,'0');
-      setLiveTime(`${h}:${m}:${s} ${ampm}`);
+      const hh       = String(h12).padStart(2, '0');
+      const mm       = String(d.getMinutes()).padStart(2, '0');
+      const ss       = String(d.getSeconds()).padStart(2, '0');
+      setLiveTime(`${hh}:${mm}:${ss} ${ampm}`);
     };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [data.timezone]);
-  const u        = units === 'metric' ? '°C' : '°F';
-  const ws       = units === 'metric' ? 'm/s' : 'mph';
-  const isNight  = nightSet.has(data.icon);
-  const showAurora = coldSet.has(data.icon);
 
   return (
     <>

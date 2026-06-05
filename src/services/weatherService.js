@@ -65,6 +65,7 @@ function processWeatherData(currentData, forecastData, airData) {
   const uvApprox = Math.max(0, Math.round((1 - clouds / 100) * (hour >= 10 && hour <= 16 ? 8 : 3)));
 
   const weatherData = {
+    timezone:    currentData.timezone,  // seconds offset from UTC
     city:        currentData.name,
     country:     currentData.sys.country,
     date:        currentData.dt,
