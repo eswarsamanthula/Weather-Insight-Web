@@ -71,15 +71,6 @@ const CountryDate = styled.div`
   margin-top:6px;
   span{display:block;font-size:0.82rem;color:var(--text-muted);}
 `;
-const LiveTime = styled.span`
-  font-family:'DM Mono',monospace;
-  font-size:0.78rem;
-  color:var(--primary);
-  opacity:0.85;
-  letter-spacing:0.06em;
-  margin-top:2px;
-  display:block;
-`;
 
 // ── 3D flip unit toggle ───────────────────────────────────────────────────────
 const UnitToggleWrap = styled.div`
@@ -473,24 +464,6 @@ const coldSet  = new Set(['13d','13n','01n','02n']);
 export default function WeatherCard({ data, units, onUnitsChange }) {
   const ico      = ic => iconMap[ic] || 'cloud';
   const icoType  = ic => iconTypeMap[ic] || 'cloud';
-
-  // Live city local time using API timezone offset
-  const [liveTime, setLiveTime] = useState('');
-  useEffect(() => {
-    const tick = () => {
-      const tzOffset = data.timezone ?? 0; // seconds
-      const utcNow = Date.now() + new Date().getTimezoneOffset() * 60000;
-      const cityMs = utcNow + tzOffset * 1000;
-      const d = new Date(cityMs);
-      const h = String(d.getHours()).padStart(2,'0');
-      const m = String(d.getMinutes()).padStart(2,'0');
-      const s = String(d.getSeconds()).padStart(2,'0');
-      setLiveTime(`${h}:${m}:${s}`);
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [data.timezone]);
   const u        = units === 'metric' ? '°C' : '°F';
   const ws       = units === 'metric' ? 'm/s' : 'mph';
   const isNight  = nightSet.has(data.icon);
@@ -513,7 +486,6 @@ export default function WeatherCard({ data, units, onUnitsChange }) {
             <CountryDate>
               <span>{data.country}</span>
               <span>{formatDate(data.date)}</span>
-              {liveTime && <LiveTime>⏱ {liveTime} local</LiveTime>}
             </CountryDate>
           </div>
           {/* 3D flip unit toggle */}
