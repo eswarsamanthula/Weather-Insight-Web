@@ -1,7 +1,7 @@
 // Enhanced Weather App JavaScript Code
 // API key
-const apiKey = '7cbc0d03e8f85d158d4b7aaa75faae0d';
-const aqiKey = '7cbc0d03e8f85d158d4b7aaa75faae0d'; // Using the same key for simplicity
+const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
+const aqiKey = import.meta.env.VITE_WEATHER_API_KEY;
 
 // DOM elements
 const cityInput = document.getElementById('city-input');
